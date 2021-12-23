@@ -1,66 +1,112 @@
+import React, {useState} from 'react';
+import { KeyboardAvoidingView, StyleSheet, Text, View, TextInput, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
+import Task from './Task';
 
-import React , {useState} from 'react';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
- 
-export default function ToDo() {
+export default function Todo() {
+  const [task, setTask] = useState();
+  const [taskItems, setTaskItems] = useState([]);
 
-  const [newTask, setnewTask] = useState('');
- 
-  const [appTasks, appTask] = useState([]);
- 
-  const taskInputHandler = (enteredText) => {
-    setnewTask(enteredText);
-  };
- 
-  const addTaskHandler = () =>{
-    appTask(currentTask => [...currentTask, newTask]);
-    console.log(newTask);
-  };
- 
+  const handleAddTask = () => {
+    Keyboard.dismiss();
+    setTaskItems([...taskItems, task])
+    setTask(null);
+  }
+
+  const completeTask = (index) => {
+    let itemsCopy = [...taskItems];
+    itemsCopy.splice(index, 1);
+    setTaskItems(itemsCopy)
+  }
+
   return (
-    <View style= {styles.container}>
-      <View style = {styles.inputContainer}>
-        <TextInput
-          placeholder = "Enter Your Task"
-          style = {styles.input}
-          onChangeText = {taskInputHandler}
-          value = {newTask}
-        />
-        <Button title = "Add"
-        onPress = {addTaskHandler}
+    <View style={styles.container}>
+      {/* Added this scroll view to enable scrolling when list gets longer than the page */}
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1
+        }}
+        keyboardShouldPersistTaps='handled'
+      >
+
+      {/* Today's Tasks */}
+      <View style={styles.tasksWrapper}>
+        <Text style={styles.sectionTitle}>Today's tasks</Text>
+        <View style={styles.items}>
+          {/* This is where the tasks will go! */}
+          {
+            taskItems.map((item, index) => {
+              return (
+                <TouchableOpacity key={index}  onPress={() => completeTask(index)}>
+                  <Task text={item} /> 
+                </TouchableOpacity>
+              )
+            })
+          }
+        </View>
+      </View>
         
-        /> 
-      </View>
-     
-      <Text style={styles.heading}>To Do List {"\n"}</Text>
-      <View>
-        {appTasks.map((task) => <Text>{task}</Text>)}
-      </View>
+      </ScrollView>
+
+      {/* Write a task */}
+      {/* Uses a keyboard avoiding view which ensures the keyboard does not cover the items on screen */}
+      <KeyboardAvoidingView 
+    
+        style={styles.writeTaskWrapper}
+      >
+        <TextInput style={styles.input} placeholder={'Write a task'} value={task} onChangeText={text => setTask(text)} />
+        <TouchableOpacity onPress={() => handleAddTask()}>
+          <View style={styles.addWrapper}>
+            <Text style={styles.addText}>Add</Text>
+          </View>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+      
     </View>
   );
 }
- 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    backgroundColor: '#E8EAED',
+  },
+  tasksWrapper: {
+    paddingTop: 80,
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold'
+  },
+  items: {
+    marginTop: 30,
+  },
+  writeTaskWrapper: {
+    position: 'absolute',
+    bottom: 60,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center'
+  },
+  input: {
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    backgroundColor: '#FFF',
+    borderRadius: 60,
+    borderColor: '#C0C0C0',
+    borderWidth: 1,
+    width: 250,
+  },
+  addWrapper: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#FFF',
+    borderRadius: 60,
     justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#C0C0C0',
+    borderWidth: 1,
   },
-  input :{
-    borderColor:"black", 
-    borderWidth:1 , 
-    padding :20,
-  },
-  inputContainer :{
-    flexDirection :'row', 
-    justifyContent :'space-between', 
-    alignContent:'center',
-    bottom:20,
-  },
-  heading :{
-    fontWeight: 'bold',
-    color : 'red',
-
-  }
+  addText: {},
 });
